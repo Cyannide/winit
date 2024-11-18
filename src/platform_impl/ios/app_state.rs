@@ -545,6 +545,7 @@ pub(crate) fn handle_nonuser_events<I: IntoIterator<Item = EventWrapper>>(
     for wrapper in events {
         match wrapper {
             EventWrapper::StaticEvent(event) => {
+				/*
                 if !processing_redraws && event.is_redraw() {
                     tracing::info!("processing `RedrawRequested` during the main event loop");
                 } else if processing_redraws && !event.is_redraw() {
@@ -553,6 +554,7 @@ pub(crate) fn handle_nonuser_events<I: IntoIterator<Item = EventWrapper>>(
                         event
                     );
                 }
+				*/
                 handler.handle_event(event)
             },
             EventWrapper::ScaleFactorChanged(event) => handle_hidpi_proxy(&mut handler, event),
