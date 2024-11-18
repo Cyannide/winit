@@ -197,6 +197,8 @@ features = [
     "UIScreen",
     "UIScreenMode",
     "UITapGestureRecognizer",
+    "UITextInput",
+    "UITextInputTraits",
     "UITouch",
     "UITraitCollection",
     "UIView",
