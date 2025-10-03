@@ -153,7 +153,7 @@ pub fn to_physical_key(keycode: Keycode) -> PhysicalKey {
         Keycode::Sleep => KeyCode::Sleep, // what about SoftSleep?
         Keycode::Wakeup => KeyCode::WakeUp,
 
-        keycode => return PhysicalKey::Unidentified(NativeKeyCode::Android(keycode.into())),
+        keycode => return PhysicalKey::Unidentified(NativeKeyCode::Android(<Keycode as Into<i32>>::into(keycode) as u32)),
     })
 }
 
@@ -224,7 +224,7 @@ pub fn character_map_and_combine_key(
 pub fn to_logical(key_char: Option<KeyMapChar>, keycode: Keycode) -> Key {
     use android_activity::input::Keycode::*;
 
-    let native = NativeKey::Android(keycode.into());
+    let native = NativeKey::Android(<Keycode as Into<i32>>::into(keycode) as u32);
 
     match key_char {
         Some(KeyMapChar::Unicode(c)) => Key::Character(smol_str::SmolStr::from_iter([c])),

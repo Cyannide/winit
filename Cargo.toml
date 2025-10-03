@@ -113,7 +113,7 @@ softbuffer = { version = "0.4.0", default-features = false, features = [
 ] }
 
 [target.'cfg(target_os = "android")'.dependencies]
-android-activity = "0.6.0"
+android-activity = { version = "0.6.0", features = ["game-activity"] }
 ndk = { version = "0.9.0", default-features = false }
 
 [target.'cfg(any(target_os = "ios", target_os = "macos"))'.dependencies]
@@ -376,3 +376,6 @@ edition = "2021"
 [workspace.dependencies]
 serde = { version = "1", features = ["serde_derive"] }
 mint = "0.5.6"
+
+[patch.crates-io]
+android-activity = { git = "https://github.com/Cyannide/android-activity.git", branch = "games-activity-4.0.0" }
