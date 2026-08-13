@@ -4,8 +4,8 @@ use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
 use smol_str::SmolStr;
-use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::closure::Closure;
 use web_sys::{
     CssStyleDeclaration, Document, Event, FocusEvent, HtmlCanvasElement, KeyboardEvent,
     PointerEvent, WheelEvent,
@@ -18,15 +18,15 @@ use crate::keyboard::{Key, KeyLocation, ModifiersState, PhysicalKey};
 use crate::platform_impl::OsError;
 use crate::window::{WindowAttributes, WindowId as RootWindowId};
 
+use super::super::WindowId;
 use super::super::cursor::CursorHandler;
 use super::super::main_thread::MainThreadMarker;
-use super::super::WindowId;
 use super::animation_frame::AnimationFrameHandler;
 use super::event_handle::EventListenerHandle;
 use super::intersection_handle::IntersectionObserverHandle;
 use super::media_query_handle::MediaQueryListHandle;
 use super::pointer::PointerHandler;
-use super::{event, fullscreen, ButtonsState, ResizeScaleHandle};
+use super::{ButtonsState, ResizeScaleHandle, event, fullscreen};
 
 #[allow(dead_code)]
 pub struct Canvas {
@@ -292,6 +292,19 @@ impl Canvas {
             }));
     }
 
+    /// Whether this keydown's browser default action is one of the clipboard
+    /// events (copy/cut/paste). Those events are the ONLY permissionless
+    /// clipboard access on the web -- `navigator.clipboard.readText()` sits
+    /// behind a permission prompt on Chrome and does not exist for page JS on
+    /// Firefox -- and calling `preventDefault()` on the keydown is what
+    /// suppresses them. The keydown itself is still delivered to the app
+    /// either way; only the default action is spared.
+    fn is_clipboard_combo(event: &KeyboardEvent) -> bool {
+        (event.ctrl_key() || event.meta_key())
+            && !event.alt_key()
+            && matches!(event.key().as_str(), "c" | "C" | "x" | "X" | "v" | "V")
+    }
+
     pub fn on_keyboard_press<F>(&mut self, mut handler: F)
     where
         F: 'static + FnMut(PhysicalKey, Key, Option<SmolStr>, KeyLocation, bool, ModifiersState),
@@ -299,7 +312,7 @@ impl Canvas {
         let prevent_default = Rc::clone(&self.prevent_default);
         self.on_keyboard_press =
             Some(self.common.add_event("keydown", move |event: KeyboardEvent| {
-                if prevent_default.get() {
+                if prevent_default.get() && !Self::is_clipboard_combo(&event) {
                     event.prevent_default();
                 }
                 let key = event::key(&event);
